@@ -1,0 +1,21 @@
+{% extends "evaluations/forbidden_base.html" %}
+
+{% block content %}
+    <div class="alert alert-warning text-center">
+        اجازه انجام این عملیات را ندارید.
+    </div>
+{% endblock %}
+
+{% block back_link %}
+    {% if offering_id %}
+        <!-- اگر از مسیر درس آمده باشد -->
+        <a href="{% url 'evaluations:professor_evaluations_list' offering_id %}" class="btn btn-secondary">
+            بازگشت به لیست ارزیابی‌ها
+        </a>
+    {% else %}
+        <!-- در غیر این صورت بازگشت به داشبورد عمومی -->
+        <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">
+            بازگشت به داشبورد
+        </a>
+    {% endif %}
+{% endblock %}

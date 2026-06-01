@@ -1,0 +1,15 @@
+{% extends "evaluations/forbidden_base.html" %}
+
+{% block content %}
+    <!-- حذف container اضافی چون در forbidden_base هست -->
+    <div class="alert alert-info text-center">
+        برای این ارزیابی قبلاً اعتراض ثبت کرده‌اید.
+    </div>
+{% endblock %}
+
+{% block back_link %}
+    <!-- استفاده از offering_id که در ویو به این صفحه پاس دادیم -->
+    <a href="{% url 'evaluations:professor_evaluations_list' offering_id %}" class="btn btn-secondary">
+        بازگشت به لیست ارزیابی‌ها
+    </a>
+{% endblock %}

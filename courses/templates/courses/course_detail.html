@@ -1,0 +1,57 @@
+{% extends "core/dashboard_base.html" %}
+
+{% block dashboard_content %}
+<style>
+    .main-card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 25px; margin-bottom: 20px; }
+    .prof-link { color: #0a74d9; text-decoration: none; font-weight: 600; }
+    .prof-link:hover { text-decoration: underline; }
+    .offering-item { padding: 10px 0; border-bottom: 1px solid #eee; }
+</style>
+
+<div style="padding: 20px;">
+    <!-- کارت اطلاعات درس -->
+    <div class="main-card">
+        <h2>{{ course.code }} - {{ course.title }}</h2>
+
+        <h4 style="margin-top: 20px;">لیست ارائه‌ها و اساتید</h4>
+        {% for o in offerings %}
+            <div class="offering-item">
+                <strong>ترم:</strong> {{ o.term }} |
+
+                <strong>استاد:</strong>
+                {% if o.professor %}
+                    <a href="{% url 'core:professor_profile' professor_id=o.professor.id %}" class="prof-link">
+                        {{ o.professor.get_full_name|default:o.professor.username }}
+                    </a>
+                {% else %}
+                    <span style="color:#999;">نامشخص</span>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p>هیچ ارائه‌ای برای این درس ثبت نشده است.</p>
+        {% endfor %}
+    </div>
+
+    <!-- کارت منابع درس -->
+    <div class="main-card">
+        <h3>📚 منابع درس</h3>
+        <hr>
+        {% if resources %}
+            <ul style="list-style: none; padding: 0;">
+                {% for resource in resources %}
+                    <li style="margin-bottom: 10px;">
+                        <a href="{{ resource.file.url }}" download class="prof-link">
+                            📎 {{ resource.title }}
+                        </a>
+                        <small style="color: #888;">
+                            (بارگذاری شده توسط: {{ resource.uploaded_by.get_full_name|default:resource.uploaded_by.username }})
+                        </small>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p style="color: #999;">هنوز منبعی بارگذاری نشده است.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

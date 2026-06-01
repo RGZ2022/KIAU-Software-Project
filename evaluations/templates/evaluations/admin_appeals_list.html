@@ -1,0 +1,89 @@
+{% extends "core/dashboard_base.html" %}
+
+{% block title %}
+  {% if list_type == "pending" %}اعتراض‌های در حال بررسی{% else %}لیست اعتراض‌ها{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="card">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <div>
+      <h2 style="margin:0; font-size:18px;">
+        {% if list_type == "pending" %}اعتراض‌های در حال بررسی{% else %}لیست کل اعتراض‌ها{% endif %}
+      </h2>
+      <p style="margin:5px 0 0 0; color:#666; font-size:13px;">
+        {% if list_type == "pending" %}نمایش و رسیدگی به اعتراض‌هایی که هنوز بررسی نشده‌اند{% else %}مدیریت و بررسی تمام اعتراض‌های ثبت‌شده{% endif %}
+      </p>
+    </div>
+    <div style="background:#f4f6f9; padding:5px 15px; border-radius:20px; font-size:13px; border:1px solid #ddd;">
+      {{ appeals|length }} مورد
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div style="padding:10px; margin-bottom:15px; border-radius:5px; {% if message.tags == 'error' %}background:#f8d7da; color:#721c24;{% else %}background:#d1ecf1; color:#0c5460;{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="table-container">
+    {% if appeals %}
+      <table class="appeals-table">
+        <thead>
+          <tr>
+            <th>استاد</th>
+            <th>دانشجو</th>
+            <th>درس</th>
+            <th>امتیاز</th>
+            <th>اعتراض</th>
+            <th>وضعیت</th>
+            <th>تاریخ تصمیم</th>
+            <th style="text-align:center;">اقدام</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ap in appeals %}
+            <tr>
+              <td>{{ ap.evaluation.offering.professor.get_full_name|default:ap.evaluation.offering.professor.username }}</td>
+              <td>{{ ap.evaluation.student.get_full_name|default:ap.evaluation.student.username }}</td>
+              <td>{{ ap.evaluation.offering.course.title }}</td>
+              <td>{{ ap.evaluation.rating }}</td>
+              <td>{{ ap.reason|truncatechars:50 }}</td>
+              <td>
+                {% if ap.status == "pending" %}
+                  <span class="status-badge status-pending">در انتظار</span>
+                {% elif ap.status == "accepted" %}
+                  <span class="status-badge status-accepted">پذیرفته</span>
+                {% else %}
+                  <span class="status-badge status-rejected">رد شده</span>
+                {% endif %}
+              </td>
+              <td>{{ ap.decided_at|date:"Y/m/d H:i"|default:"---" }}</td>
+              <td style="text-align:center;">
+                {% if ap.status != "pending" %}
+                  <span style="color:#999; font-size:12px;">قفل شده</span>
+                {% else %}
+                  <form method="post" action="{% url 'evaluations:update_appeal_status' ap.id %}" class="form-inline">
+                    {% csrf_token %}
+                    <select name="status" class="select-sm">
+                      <option value="accepted">پذیرفته</option>
+                      <option value="rejected">رد شده</option>
+                    </select>
+                    <button class="btn btn-primary" type="submit">ثبت</button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div style="text-align:center; padding:40px; color:#888;">
+        {% if list_type == "pending" %}موردی در حال بررسی نیست.{% else %}اعتراضی ثبت نشده است.{% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

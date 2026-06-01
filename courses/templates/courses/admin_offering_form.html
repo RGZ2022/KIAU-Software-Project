@@ -1,0 +1,236 @@
+{% extends "core/dashboard_base.html" %}
+
+{% block title %}
+  {% if mode == "create" %}ایجاد ارائه جدید{% else %}ویرایش ارائه{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<section class="card offering-form-card">
+  <header class="offering-form-header">
+    <h2>
+      {% if mode == "create" %}ایجاد ارائه جدید{% else %}ویرایش مشخصات ارائه{% endif %}
+    </h2>
+    <p class="muted">
+      {% if mode == "create" %}
+        لطفاً اطلاعات ارائه را وارد کنید.
+      {% else %}
+        اطلاعات ارائه را ویرایش کنید.
+      {% endif %}
+    </p>
+  </header>
+
+  <form method="post" class="form-container">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="form-alert form-alert--error">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <div class="form-grid">
+      {% for field in form %}
+        {# فیلد چک‌باکس (is_active) را هم‌ردیف با لیبل نمایش می‌دهیم #}
+        {% if field.field.widget.input_type == "checkbox" or field.name == "is_active" %}
+          <div class="form-group form-group--checkbox">
+            {{ field }}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+            {% if field.help_text %}
+              <small class="help-text">{{ field.help_text }}</small>
+            {% endif %}
+
+            {% if field.errors %}
+              <div class="field-errors">{{ field.errors }}</div>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+            {{ field }}
+
+            {% if field.help_text %}
+              <small class="help-text">{{ field.help_text }}</small>
+            {% endif %}
+
+            {% if field.errors %}
+              <div class="field-errors">{{ field.errors }}</div>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">ذخیره</button>
+      <a href="{% url 'courses:admin_offerings' %}" class="btn btn-secondary">انصراف</a>
+    </div>
+  </form>
+</section>
+
+<style>
+  /* کارت فرم */
+  .offering-form-card{
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 22px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .offering-form-header{
+    margin-bottom: 18px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+
+  .offering-form-header h2{
+    margin: 0;
+    font-size: 18px;
+  }
+
+  .offering-form-header .muted{
+    margin: 6px 0 0 0;
+    color: #666;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  /* پیام خطای کلی فرم */
+  .form-alert{
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    border: 1px solid transparent;
+  }
+  .form-alert--error{
+    background: #f8d7da;
+    border-color: #f1aeb5;
+    color: #842029;
+  }
+
+  /* شبکه فرم */
+  .form-grid{
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .form-group{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group label{
+    font-weight: 700;
+    font-size: 13px;
+    color: #333;
+  }
+
+  /* استایل input/select/textarea */
+  .form-container input,
+  .form-container select,
+  .form-container textarea{
+    padding: 10px 10px;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+
+  .form-container textarea{
+    min-height: 90px;
+    resize: vertical;
+  }
+
+  .form-container input:focus,
+  .form-container select:focus,
+  .form-container textarea:focus{
+    border-color: #4a78ff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74,120,255,.12);
+  }
+
+  /* چک‌باکس: تراز درست کنار لیبل */
+  .form-group--checkbox{
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    background: #fafafa;
+  }
+
+  /* چون برای checkbox هم width:100% داشتیم، اینجا خنثی می‌کنیم */
+  .form-group--checkbox input[type="checkbox"]{
+    width: 18px !important;
+    height: 18px;
+    margin: 0;
+    box-shadow: none !important;
+    cursor: pointer;
+  }
+
+  .form-group--checkbox label{
+    margin: 0;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .help-text{
+    color: #666;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  .field-errors{
+    color: #b02a37;
+    font-size: 12px;
+  }
+
+  /* دکمه‌ها */
+  .form-actions{
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn{
+    display: inline-block;
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .btn-primary{
+    background: #198754;
+    border-color: #198754;
+    color: #fff;
+  }
+
+  .btn-primary:hover{
+    background: #157347;
+    border-color: #146c43;
+  }
+
+  .btn-secondary{
+    background: #fff;
+    border-color: #cfcfcf;
+    color: #444;
+  }
+
+  .btn-secondary:hover{
+    background: #f5f5f5;
+  }
+</style>
+{% endblock %}

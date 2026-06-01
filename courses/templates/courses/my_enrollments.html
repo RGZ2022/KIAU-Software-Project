@@ -1,0 +1,53 @@
+{% extends "core/dashboard_base.html" %}
+
+{% block dashboard_content %}
+<div class="content-wrapper">
+    <h2 class="page-title">📚 ثبت‌نام‌های من</h2>
+    <p>لیست درخواست‌ها و وضعیت آن‌ها</p>
+
+    <div class="filter-card" style="background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <table class="custom-table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #34495e; color: #fff;">
+                    <th style="padding: 15px;">درس</th>
+                    <th style="padding: 15px;">ترم</th>
+                    <th style="padding: 15px;">استاد</th>
+                    <th style="padding: 15px;">وضعیت</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enrollment in enrollments %}
+                <tr style="border-bottom: 1px solid #eee; text-align: center;">
+                    <td style="padding: 12px;">
+                        <!-- لینک به صفحه جزئیات درس -->
+                        <a href="{% url 'courses:course_detail' enrollment.offering.course.id %}" style="text-decoration: none; color: #3498db; font-weight: bold;">
+                            {{ enrollment.offering.course.title }}
+                        </a>
+                    </td>
+                    <td style="padding: 12px;">{{ enrollment.offering.term|default:"-" }}</td>
+                    <td style="padding: 12px;">
+                        <!-- اصلاح لینک پروفایل استاد -->
+                        {% if enrollment.offering.professor %}
+                            <a href="{% url 'core:professor_profile' professor_id=enrollment.offering.professor.id %}" style="text-decoration: none; color: #2c3e50; font-weight: 600;">
+                                {{ enrollment.offering.professor.first_name }} {{ enrollment.offering.professor.last_name }}
+                            </a>
+                        {% else %}
+                            <span>نامشخص</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 12px;">
+                        <span class="status-badge" style="background: #e8f6f3; color: #27ae60; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">
+                            {{ enrollment.get_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="padding: 20px;">شما در هیچ درسی ثبت‌نام نکرده‌اید.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

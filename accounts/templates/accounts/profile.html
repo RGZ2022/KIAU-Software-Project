@@ -1,0 +1,95 @@
+{% extends "core/dashboard_base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .profile-card { padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .profile-item { margin-bottom: 15px; display: flex; flex-direction: column; }
+    .label { font-weight: bold; margin-bottom: 5px; color: #2c3e50; }
+    
+    .profile-card input { 
+        padding: 10px; 
+        border: 1px solid #ccc; 
+        border-radius: 4px; 
+        font-family: tahoma;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* دکمه اصلی ذخیره */
+    .btn-save { 
+        background: #2c3e50; 
+        color: white; 
+        border: none; 
+        padding: 10px 20px; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        margin-top: 10px;
+        font-family: tahoma;
+        display: inline-block;
+    }
+    .btn-save:hover { background: #34495e; }
+
+    /* دکمه تغییر رمز عبور */
+    .btn-change-password {
+        background: #f39c12; /* رنگ نارنجی برای تمایز */
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-right: 10px; /* فاصله از دکمه ذخیره */
+        font-size: 14px;
+        transition: background 0.3s;
+        font-family: tahoma;
+    }
+    .btn-change-password:hover {
+        background: #e67e22;
+    }
+
+    .action-buttons {
+        margin-top: 20px;
+        border-top: 1px solid #eee;
+        padding-top: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="profile-container">
+    <h2>ویرایش پروفایل</h2>
+
+    <div class="profile-card">
+        <!-- فرم ویرایش -->
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="profile-item">
+                <span class="label">نام کاربری:</span>
+                {{ form.username }}
+            </div>
+
+            <div class="profile-item">
+                <span class="label">ایمیل:</span>
+                {{ form.email }}
+            </div>
+
+            <div class="profile-item">
+                <span class="label">نقش:</span>
+                <span class="value">
+                    {% if request.user.role == "student" %} دانشجو
+                    {% elif request.user.role == "teacher" %} استاد
+                    {% else %} مدیر {% endif %}
+                </span>
+            </div>
+
+            <div class="action-buttons">
+                <button type="submit" class="btn-save">ذخیره تغییرات</button>
+                
+                <!-- دکمه تغییر رمز عبور -->
+                <a href="{% url 'accounts:change_password' %}" class="btn-change-password">تغییر رمز عبور</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

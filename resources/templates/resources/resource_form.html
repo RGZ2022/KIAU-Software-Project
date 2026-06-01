@@ -1,0 +1,36 @@
+{% extends 'core/dashboard_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/resources.css' %}">
+{% endblock %}
+
+{% block dashboard_content %}
+
+<div class="form-container">
+
+    <h2>آپلود منبع جدید</h2>
+    <p>لطفاً مشخصات فایل را وارد کنید</p>
+
+    <hr>
+
+    <form method="post" enctype="multipart/form-data" class="resource-form">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-field">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div class="field-error">{{ field.errors.0 }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn-submit">ذخیره و آپلود</button>
+    </form>
+
+    <a href="{% url 'resources:resource_list' %}" class="back-link">بازگشت به لیست</a>
+</div>
+
+{% endblock %}

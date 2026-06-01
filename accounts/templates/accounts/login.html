@@ -1,0 +1,85 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}ورود به سامانه {% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ۱. اعمال پس‌زمینه فقط برای صفحه لاگین */
+    body {
+        margin: 0;
+        background: url('/media/images/2.png') no-repeat center center fixed !important;
+        background-size: cover !important;
+    }
+
+    /* ۲. خنثی کردن محدودیت‌های لایه‌های base.html */
+    .layout, .page-content {
+        display: block !important;
+        background: transparent !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+
+    /* ۳. ایجاد کانتینر وسط‌چین با افکت شیشه‌ای تیره روی عکس */
+    .login-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 70px); /* کسر ارتفاع نوبار */
+        background: rgba(0, 0, 0, 0.3); /* تیره کردن ملایم پس‌زمینه برای تمرکز روی فرم */
+    }
+
+    .login-box {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .login-box h2 { color: #2d3436; margin-bottom: 30px; font-weight: 800; }
+    .form-group { text-align: right; margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; color: #636e72; }
+    .form-group input {
+        width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px;
+        font-family: 'Vazirmatn', sans-serif; box-sizing: border-box;
+    }
+    .btn-login {
+        width: 100%; padding: 14px; background: #0984e3; color: white;
+        border: none; border-radius: 10px; font-size: 1.1rem; cursor: pointer;
+        font-family: 'Vazirmatn', sans-serif; transition: 0.3s;
+    }
+    .btn-login:hover { background: #0072c6; transform: translateY(-2px); }
+    .extra-links { margin-top: 25px; font-size: 0.9rem; line-height: 1.8; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-wrapper">
+    <div class="login-box">
+        <h2>ورود به سامانه</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>نام کاربری</label>
+                <input type="text" name="username" placeholder="نام کاربری" required>
+            </div>
+            <div class="form-group">
+                <label>رمز عبور</label>
+                <input type="password" name="password" placeholder="********" required>
+            </div>
+            <button type="submit" class="btn-login">ورود به حساب</button>
+        </form>
+        <div class="extra-links">
+            هنوز ثبت‌نام نکرده‌اید؟ <a href="{% url 'accounts:register' %}">ایجاد حساب جدید</a>
+            <br>
+            <a href="#" style="color: #b2bec3;">فراموشی رمز عبور</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

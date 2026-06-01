@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="fa" dir="rtl"> <!-- جهت راست‌چین اضافه شد -->
+{% load static %}
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}پنل دانشگاهی{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar (همان کدی که داشتید) -->
+    <nav class="navbar"> ... </nav>
+
+    <div class="layout">
+      {% if user.is_authenticated %}
+        <aside class="sidebar"> ... </aside>
+      {% endif %}
+
+      <main class="page-content">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+</body>
+</html>

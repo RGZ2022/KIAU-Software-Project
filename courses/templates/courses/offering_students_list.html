@@ -1,0 +1,185 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>دانشجویان ارائه</title>
+    <style>
+        /* --- فونت فارسی پایه --- */
+        body {
+            font-family: 'Vazirmatn', 'Tahoma', sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #2b2b2b;
+        }
+
+        .course-info {
+            background-color: #f1f5ff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #d3e0ff;
+            line-height: 1.7;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        table th, table td {
+            border: 1px solid #ccc;
+            padding: 10px 12px;
+            text-align: center;
+        }
+
+        table th {
+            background-color: #004aad;
+            color: white;
+            font-weight: 600;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9fbff;
+        }
+
+        table tr:hover {
+            background-color: #e7f0ff;
+        }
+
+        .status-active {
+            background-color: #e8f9e8;
+            color: #198754;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .empty-row {
+            color: #777;
+            font-style: italic;
+        }
+
+        .btn-back {
+            display: inline-block;
+            text-decoration: none;
+            background-color: #777;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn-back:hover {
+            background-color: #555;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            th {
+                display: none;
+            }
+            tr {
+                margin-bottom: 10px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            td {
+                border: none;
+                padding: 10px;
+                text-align: right;
+                display: flex;
+                justify-content: space-between;
+            }
+            td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                color: #555;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-bar">
+        <h2>دانشجویان این ارائه</h2>
+        <a href="{% url 'courses:professor_offerings' %}" class="btn-back">← بازگشت</a>
+    </div>
+
+    <div class="course-info">
+        <strong>درس:</strong> {{ offering.course.title }} ({{ offering.course.code }})<br>
+        <strong>ترم:</strong> {{ offering.term }}<br>
+        <strong>استاد:</strong> 
+        {% if offering.professor.first_name or offering.professor.last_name %}
+            {{ offering.professor.first_name }} {{ offering.professor.last_name }}
+        {% else %}
+            {{ offering.professor.username }}
+        {% endif %}
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ردیف</th>
+            <th>نام کاربری</th>
+            <th>نام کامل</th>
+            <th>ایمیل</th>
+            <th>وضعیت</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for e in enrollments %}
+            {% with s=e.student %}
+            <tr>
+                <td data-label="ردیف">{{ forloop.counter }}</td>
+                <td data-label="نام کاربری">{{ s.username }}</td>
+                <td data-label="نام کامل">
+                    {% if s.first_name or s.last_name %}
+                        {{ s.first_name }} {{ s.last_name }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td data-label="ایمیل">{{ s.email }}</td>
+                <td data-label="وضعیت"><span class="status-active">{{ e.status|title }}</span></td>
+            </tr>
+            {% endwith %}
+        {% empty %}
+            <tr><td colspan="5" class="empty-row">هنوز هیچ دانشجویی ثبت‌نام نکرده است.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

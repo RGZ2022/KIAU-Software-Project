@@ -1,0 +1,16 @@
+{% extends "evaluations/forbidden_base.html" %}
+
+{% block content %}
+    <!-- محتوای اصلی که از forbidden_base ارث می‌برید -->
+    <div class="alert alert-info text-center">
+        {{ message }}
+    </div>
+{% endblock %}
+
+{% block back_link %}
+    <!-- تعریف دکمه بازگشت اختصاصی برای این صفحه -->
+    <!-- در اینجا چون offering_id را از ویو فرستادیم، می‌توانیم از آن استفاده کنیم -->
+    <a href="{% url 'evaluations:professor_evaluations_list' offering_id %}" class="btn btn-secondary">
+        بازگشت به لیست ارزیابی‌ها
+    </a>
+{% endblock %}

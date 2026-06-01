@@ -1,0 +1,272 @@
+{% extends "core/base_no_sidebar.html" %}
+{% load custom_tags %}
+
+{% block title %}پروفایل {{ professor.get_full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --bg-fallback: #1a202c;
+        --star-color: #f59e0b;
+        --text-dark: #2d3748;
+        --border-color: #e2e8f0;
+        --primary-blue: #3182ce;
+    }
+
+    body {
+        background: 
+            linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+            url("/media/images/4.png") center center / cover fixed no-repeat,
+            var(--bg-fallback) !important;
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+
+    /* حذف سایدبار و تنظیم عرض محتوا */
+    .sidebar, aside, .main-sidebar { display: none !important; }
+    .content-wrapper, .main-content { margin: 0 !important; width: 100% !important; background: transparent !important; }
+
+    .professor-page { padding: 40px 0; direction: rtl; }
+
+    .main-glass-card {
+        background: white; 
+        border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        padding: 40px;
+        color: var(--text-dark);
+        margin-bottom: 30px;
+    }
+
+    /* استایل بخش امتیاز بزرگ */
+    .rating-big-number {
+        font-size: 5.5rem;
+        font-weight: 900;
+        color: var(--star-color);
+        line-height: 1;
+        margin-bottom: 10px;
+    }
+
+    /* ردیف‌های توزیع امتیاز */
+    .rating-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 12px;
+    }
+
+    .rating-label {
+        min-width: 45px;
+        font-weight: bold;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .progress-container {
+        flex-grow: 1;
+        height: 12px;
+        background-color: #edf2f7;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        border-radius: 10px;
+    }
+
+    .rating-count-label {
+        min-width: 60px;
+        font-size: 0.85rem;
+        color: #718096;
+        text-align: left;
+    }
+
+    /* کارت‌های نظرات */
+    .comment-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 15px;
+        color: var(--text-dark);
+    }
+
+    /* پنل ثبت ارزیابی (اصلاح شده) */
+    .eval-box {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        border: 1px solid var(--border-color);
+        position: sticky;
+        top: 20px;
+    }
+
+    .star-picker { 
+        display: flex; 
+        flex-direction: row-reverse; 
+        justify-content: center; 
+        gap: 12px; 
+        margin-bottom: 25px;
+    }
+    .star-picker input { display: none; }
+    .star-picker label { font-size: 3rem; color: #cbd5e0; cursor: pointer; transition: 0.2s; }
+    .star-picker input:checked ~ label, 
+    .star-picker label:hover, 
+    .star-picker label:hover ~ label { color: var(--star-color); }
+
+    .custom-textarea {
+        width: 100% !important;
+        border: 2px solid #edf2f7 !important;
+        border-radius: 15px !important;
+        padding: 15px !important;
+        background-color: #f8fafc !important;
+        resize: none;
+        transition: 0.3s;
+        font-size: 1rem;
+    }
+
+    .custom-textarea:focus {
+        border-color: var(--primary-blue) !important;
+        background-color: #fff !important;
+        box-shadow: 0 0 0 4px rgba(49, 130, 206, 0.1);
+        outline: none;
+    }
+
+    .btn-submit-new {
+        background: linear-gradient(135deg, #3182ce, #2b6cb0);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        width: 100%;
+        margin-top: 20px;
+        transition: 0.3s;
+        box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+    }
+
+    .btn-submit-new:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(49, 130, 206, 0.4);
+        filter: brightness(1.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="professor-page">
+    <div class="container">
+        <!-- کارت اصلی مشخصات استاد -->
+        <div class="main-glass-card shadow-lg">
+            <div class="row align-items-center">
+                <!-- اطلاعات استاد -->
+                <div class="col-lg-4 text-center border-start">
+                    <div class="mb-3">
+                        <i class="fas fa-user-circle fa-7x text-light-emphasis"></i>
+                    </div>
+                    <h2 class="fw-bold mb-1">{{ professor.get_full_name|default:professor.username }}</h2>
+                    <p class="text-muted fs-5">استاد ارجمند دانشگاه</p>
+                </div>
+
+                <!-- امتیاز کل -->
+                <div class="col-lg-3 text-center">
+                    <div class="rating-big-number">{{ stats.avg_overall|default:"0"|floatformat:1 }}</div>
+                    <div class="fs-4 text-warning">{{ stats.avg_overall|star_display }}</div>
+                    <div class="mt-2 text-muted">میانگین از {{ stats.total_count|default:"0" }} رأی</div>
+                </div>
+
+                <!-- توزیع امتیازها -->
+                <div class="col-lg-5">
+                    <h6 class="fw-bold mb-4 text-secondary">توزیع امتیازات:</h6>
+                    {% for i in "54321" %}
+                    <div class="rating-row">
+                        <div class="rating-label">
+                            <span>{{ i }}</span>
+                            <i class="fas fa-star text-warning small"></i>
+                        </div>
+                        <div class="progress-container">
+                            {% with count=stats.distribution|get_item:i %}
+                                {% if stats.total_count > 0 %}
+                                    {% widthratio count stats.total_count 100 as percentage %}
+                                {% else %}{% with percentage=0 %}{% endwith %}{% endif %}
+                                <div class="progress-bar-fill" style="width: {{ percentage }}%"></div>
+                            {% endwith %}
+                        </div>
+                        <div class="rating-count-label">
+                            {{ stats.distribution|get_item:i|default:"0" }} رأی
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- لیست نظرات (سمت راست) -->
+            <div class="col-lg-8">
+                <h4 class="fw-bold mb-4 text-white">نظرات دانشجویان</h4>
+                {% for evaluation in page_obj %}
+                <div class="card comment-card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-warning fs-5">{{ evaluation.rating|star_display }}</span>
+                            <span class="badge bg-light text-dark border">{{ evaluation.created_at|date:"Y/m/d" }}</span>
+                        </div>
+                        <p class="card-text fs-6" style="line-height: 1.8;">{{ evaluation.comment|default:"بدون توضیح." }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center p-5 bg-white rounded-4 opacity-75">
+                    <p class="text-muted">هنوز هیچ نظری برای این استاد ثبت نشده است.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- پنل ثبت ارزیابی (سمت چپ - اصلاح شده) -->
+            <div class="col-lg-4">
+                {% if user.is_authenticated and user.role == "student" %}
+                <div class="eval-box shadow">
+                    <h5 class="fw-bold mb-4 text-center border-bottom pb-3">ثبت ارزیابی شما</h5>
+                    
+                    {% if stats.user_has_rated %}
+                        <div class="alert alert-info text-center py-3">
+                            <i class="fas fa-check-circle d-block fa-2x mb-2"></i>
+                            شما قبلاً به این استاد امتیاز داده‌اید.
+                        </div>
+                    {% else %}
+                        <form id="evaluationForm">
+                            {% csrf_token %}
+                            <label class="d-block text-center mb-2 fw-bold text-muted">امتیاز دهید:</label>
+                            <div class="star-picker">
+                                <input type="radio" name="rating" id="r5" value="5" required><label for="r5">★</label>
+                                <input type="radio" name="rating" id="r4" value="4"><label for="r4">★</label>
+                                <input type="radio" name="rating" id="r3" value="3"><label for="r3">★</label>
+                                <input type="radio" name="rating" id="r2" value="2"><label for="r2">★</label>
+                                <input type="radio" name="rating" id="r1" value="1"><label for="r1">★</label>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold mb-2">تجربه شما:</label>
+                                <textarea 
+                                    name="comment" 
+                                    class="form-control custom-textarea" 
+                                    rows="7" 
+                                    placeholder="نظر خود را در مورد این استاد بنویسید..."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-submit-new">
+                                <i class="fas fa-paper-plane me-2"></i> ثبت نهایی ارزیابی
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

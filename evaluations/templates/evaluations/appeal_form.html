@@ -1,0 +1,56 @@
+{% extends 'core/dashboard_base.html' %}
+
+{% block dashboard_content %}
+<div class="card">
+    <h2 style="margin-top: 0; color: #2c3e50;">ثبت اعتراض</h2>
+    <p style="color: #666;">لطفاً دلیل اعتراض خود را نسبت به ارزیابی انتخاب شده وارد کنید:</p>
+    
+    <form method="post" style="margin-top: 20px;">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 15px;">
+            {{ form.as_p }}
+        </div>
+
+        <button type="submit" style="
+            background-color: #34495e;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        " onmouseover="this.style.backgroundColor='#2c3e50'" onmouseout="this.style.backgroundColor='#34495e'">
+            ثبت نهایی اعتراض
+        </button>
+        
+        <!-- داخل فایل appeal_form.html -->
+     <!-- در فایل appeal_form.html -->
+     <a href="{% url 'evaluations:professor_evaluations_list' offering_id=offering_id %}" 
+      style="text-decoration: none; color: #dc3545; margin-right: 15px; font-weight: bold;">
+     انصراف
+     </a>
+
+
+    </form>
+</div>
+
+<style>
+    /* استایل‌دهی به فیلد فرم برای زیباتر شدن */
+    p label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box; /* برای اینکه padding عرض را به هم نزند */
+        font-family: tahoma;
+    }
+</style>
+{% endblock %}
+

@@ -1,0 +1,87 @@
+{% extends "core/dashboard_base.html" %}
+
+{% block dashboard_content %}
+<style>
+    /* استایل‌های هماهنگ با طراحی قبلی شما */
+    .dashboard-container {
+        padding: 20px;
+    }
+    .main-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+    .stats-grid {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+    .stat-box {
+        flex: 1;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 20px;
+        text-align: center;
+        border: 1px solid #f0f0f0;
+    }
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #0a74d9;
+        margin: 10px 0;
+    }
+    .btn-action {
+        display: inline-block;
+        background-color: #0a74d9;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+    .btn-action:hover { background-color: #054f96; color: white; }
+    h3 { margin-top: 0; color: #333; }
+</style>
+
+<div class="dashboard-container">
+    <!-- خوش‌آمدگویی -->
+    <div class="main-card">
+        <h3>سلام، {{ user.username }} عزیز! 👋</h3>
+        <p style="color: #666;">به پنل کاربری خوش آمدید. می‌توانید وضعیت دروس خود را اینجا مشاهده کنید.</p>
+    </div>
+
+    <!-- آمار -->
+        <!-- آمار اصلاح شده با چینش متقارن -->
+        <div class="stats-grid" style="display: flex; gap: 20px; margin-bottom: 25px; align-items: stretch;">
+        
+            <div class="stat-box" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <h5 style="color: #555;">دروس فعال</h5>
+                    <div class="stat-number">{{ count }}</div>
+                </div>
+                <a href="{% url 'core:my_courses' %}" class="btn-action">مشاهده لیست دروس</a>
+            </div>
+            
+            <div class="stat-box" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <h5 style="color: #555;">دروس ارائه‌شده</h5>
+                    <div class="stat-number" style="font-size: 1.5rem; padding: 25px 0;">📚</div>
+                </div>
+                <a href="{% url 'courses:offerings_list' %}" class="btn-action">مشاهده لیست ارائه</a>
+            </div>
+            
+        </div>
+    
+
+    <!-- اطلاعیه‌ها -->
+    <div class="main-card">
+        <h5>اطلاعیه‌های اخیر</h5>
+        <hr style="border-top: 1px solid #eee;">
+        <p style="text-align: center; color: #999; padding: 20px;">اطلاعیه جدیدی برای شما ثبت نشده است.</p>
+    </div>
+</div>
+{% endblock %}

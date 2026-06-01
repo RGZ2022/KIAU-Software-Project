@@ -1,0 +1,274 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}سیستم دانشگاه{% endblock %}</title>
+
+    {% block extra_css %}{% endblock %}
+
+    <style>
+        *{
+            box-sizing:border-box;
+        }
+
+        body{
+            margin:0;
+            font-family:tahoma;
+            background:#f4f6f9;
+            direction:rtl;
+        }
+
+        /* ================= TOPBAR ================= */
+
+        .topbar{
+            height:60px;
+            background:#2c3e50;
+            color:white;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding:0 20px;
+        }
+
+        .system-title{
+            font-size:20px;
+            font-weight:bold;
+        }
+
+        .user-actions{
+            display:flex;
+            align-items:center;
+            gap:15px;
+        }
+
+        .username{
+            color:#ecf0f1;
+            font-size:14px;
+        }
+
+        .logout-btn{
+            background:#e74c3c;
+            color:white;
+            border:none;
+            padding:6px 15px;
+            border-radius:4px;
+            cursor:pointer;
+            font-family:tahoma;
+            transition:.3s;
+        }
+
+        .logout-btn:hover{
+            background:#c0392b;
+        }
+
+        /* ================= LAYOUT ================= */
+
+        .layout-container{
+            display:flex;
+            min-height:calc(100vh - 60px);
+        }
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar{
+            width:230px;
+            min-height:calc(100vh - 60px);
+            background:#34495e;
+            color:white;
+            padding-top:20px;
+            flex-shrink:0;
+        }
+
+        .sidebar a{
+            display:block;
+            color:white;
+            text-decoration:none;
+            padding:12px 20px;
+            transition:.2s;
+        }
+
+        .sidebar a:hover{
+            background:#2c3e50;
+        }
+
+        /* ================= CONTENT ================= */
+
+        .content{
+            flex:1;
+            padding:30px;
+            background:#f4f6f9;
+            overflow-y:auto;
+        }
+
+        .card{
+            background:white;
+            padding:20px;
+            border-radius:8px;
+            box-shadow:0 2px 6px rgba(0,0,0,.1);
+        }
+
+        /* ================= TABLES ================= */
+
+        .table-container{
+            margin-top:20px;
+            overflow-x:auto;
+        }
+
+        .appeals-table{
+            width:100%;
+            border-collapse:collapse;
+            font-size:14px;
+            background:white;
+        }
+
+        .appeals-table th,
+        .appeals-table td{
+            padding:12px;
+            border-bottom:1px solid #eee;
+            text-align:right;
+        }
+
+        .appeals-table th{
+            background:#f8f9fa;
+            font-weight:bold;
+        }
+
+        .status-badge{
+            padding:4px 8px;
+            border-radius:4px;
+            font-size:12px;
+            font-weight:bold;
+        }
+
+        .status-pending{
+            background:#fff3cd;
+            color:#856404;
+        }
+
+        .status-accepted{
+            background:#d4edda;
+            color:#155724;
+        }
+
+        .status-rejected{
+            background:#f8d7da;
+            color:#721c24;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Topbar -->
+    <div class="topbar">
+
+        <div class="system-title">
+            مدیریت منابع دانشگاه
+        </div>
+
+        {% if user.is_authenticated %}
+        <div class="user-actions">
+
+            <span class="username">
+                {{ request.user.username }}
+            </span>
+
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">
+                    خروج
+                </button>
+            </form>
+
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Layout -->
+    <div class="layout-container">
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+
+            {% if request.user.role|lower == "professor" %}
+
+                <a href="{% url 'core:dashboard_professor' %}">
+                    🏠 داشبورد
+                </a>
+
+                <a href="{% url 'core:professor_profile' request.user.id %}">
+                    👤 پروفایل عمومی من
+                </a>
+
+                <a href="{% url 'courses:professor_offerings' %}">
+                    📚 ارائه‌های من
+                </a>
+
+                <a href="{% url 'resources:resource_create' %}">
+                    📤 آپلود منابع
+                </a>
+
+                <a href="{% url 'resources:resource_list' %}">
+                    📚 منابع من
+                </a>
+
+            {% elif request.user.role|lower == "admin" %}
+
+                <a href="{% url 'core:dashboard_admin' %}">
+                    ⚙️ پنل مدیریت
+                </a>
+
+                <a href="{% url 'admin:index' %}">
+                    👥 مدیریت کاربران
+                </a>
+
+                <a href="{% url 'evaluations:admin_appeals_list' %}">
+                    📋 کل درخواست‌ها
+                </a>
+
+                <a href="{% url 'evaluations:admin_pending_appeals_list' %}">
+                    ⏳ در انتظار بررسی
+                </a>
+
+                <a href="{% url 'courses:admin_offerings' %}">
+                    📚 مدیریت ارائه‌ها
+                </a>
+
+                <a href="{% url 'courses:admin_offering_create' %}">
+                    ➕ ایجاد ارائه جدید
+                </a>
+
+            {% else %}
+
+                <a href="{% url 'core:dashboard_student' %}">
+                    🏠 داشبورد
+                </a>
+
+                <a href="{% url 'courses:my_enrollments' %}">
+                    🎓 دروس من
+                </a>
+
+                <a href="{% url 'courses:offerings_list' %}">
+                    📚 دروس ارائه‌شده
+                </a>
+
+            {% endif %}
+
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+
+            {% block dashboard_content %}
+            {% endblock %}
+
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,165 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}ثبت‌نام در سامانه{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ۱. تنظیم پس‌زمینه سراسری */
+    body {
+        margin: 0;
+        background: url('/media/images/3.png') no-repeat center center fixed !important;
+        background-size: cover !important;
+    }
+
+    /* حذف محدودیت‌های قالب اصلی برای نمایش تمام‌صفحه */
+    .layout, .page-content, .container, .main-content {
+        display: block !important;
+        background: transparent !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        border: none !important;
+    }
+
+    .register-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: rgba(0, 0, 0, 0.4); 
+        direction: rtl;
+        padding: 20px;
+    }
+
+    .form-container {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        width: 100%;
+        max-width: 480px;
+    }
+
+    .form-container h2 {
+        margin-bottom: 30px;
+        font-size: 1.7rem;
+        color: #1e272e;
+        font-weight: 800;
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        text-align: right;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #2d3436;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    /* استایل‌دهی به اینپوت‌های جنگو */
+    .form-group input, .form-group select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 2px solid #ddd;
+        font-family: 'Vazirmatn', sans-serif;
+        font-size: 0.95rem;
+        box-sizing: border-box;
+        outline: none;
+        transition: 0.3s;
+    }
+
+    .form-group input:focus {
+        border-color: #0984e3;
+        box-shadow: 0 0 8px rgba(9, 132, 227, 0.2);
+    }
+
+    .help-text {
+        display: block;
+        font-size: 0.75rem;
+        color: #636e72;
+        margin-top: 5px;
+        line-height: 1.6;
+    }
+
+    .error-msg {
+        color: #d63031;
+        font-size: 0.8rem;
+        margin-top: 5px;
+        font-weight: bold;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        background: #0984e3;
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: 0.3s;
+    }
+
+    .btn-submit:hover {
+        background: #0072c6;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-wrapper">
+  <div class="form-container">
+    <h2>ثبت‌نام در سامانه</h2>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% for field in form %}
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}">
+            {% if field.name == "username" %}نام کاربری
+            {% elif field.name == "email" %}آدرس ایمیل
+            {% elif field.name == "role" %}نقش کاربری
+            {% elif field.name == "password" %}رمز عبور
+            {% elif field.name == "confirm_password" %}تکرار رمز عبور
+            {% else %}{{ field.label }}{% endif %}
+          </label>
+          
+          {{ field }}
+          
+          {% if field.help_text %}
+            <span class="help-text">
+                {% if "Required" in field.help_text %}الزامی است.
+                {% elif "password" in field.help_text %}رمز عبور باید شامل حروف و اعداد باشد.
+                {% else %}{{ field.help_text|safe }}{% endif %}
+            </span>
+          {% endif %}
+          
+          {% for error in field.errors %}
+            <div class="error-msg">{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="btn-submit">تایید و ایجاد حساب</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 25px; font-size: 0.9rem;">
+      <span>قبلاً ثبت‌نام کرده‌اید؟</span>
+      <a href="{% url 'accounts:login' %}" style="color: #0984e3; text-decoration: none; font-weight: bold;">ورود به حساب</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

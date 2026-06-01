@@ -1,0 +1,176 @@
+{% extends "core/dashboard_base.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+
+<div class="offerings-container">
+
+    <div class="offerings-header">
+        <h2>ارائه‌های من</h2>
+        <p>لیست درس‌هایی که در این ترم ارائه می‌دهید</p>
+    </div>
+
+    <div class="offerings-card">
+        <div class="card-title">
+            <h3>لیست ارائه‌ها</h3>
+            <span class="count">{{ offerings|length }} مورد</span>
+        </div>
+
+        {% if offerings %}
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>کد درس</th>
+                    <th>عنوان درس</th>
+                    <th>ترم</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for o in offerings %}
+                <tr>
+                    <td>{{ o.course.code }}</td>
+                    <td>{{ o.course.title }}</td>
+                    <td>{{ o.term }}</td>
+
+                    <td class="actions">
+
+                        <a class="btn students-btn"
+                           href="{% url 'courses:offering_students' o.id %}">
+                           👥 مشاهده دانشجویان
+                        </a>
+
+                        <a class="btn eval-btn"
+                           href="{% url 'evaluations:professor_evaluations_list' o.id %}">
+                           📊 مشاهده ارزیابی‌ها
+                        </a>
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+        {% else %}
+            <p class="empty">هیچ ارائه‌ای ثبت نشده است.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+
+.offerings-container{
+    max-width:1000px;
+    margin:30px auto;
+}
+
+.offerings-header h2{
+    margin:0;
+    color:#2c3e50;
+    font-size:26px;
+}
+
+.offerings-header p{
+    margin-top:5px;
+    color:#7f8c8d;
+}
+
+.offerings-card{
+    margin-top:25px;
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+.card-title{
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1px solid #ddd;
+    padding-bottom:12px;
+    margin-bottom:20px;
+}
+
+.card-title h3{
+    margin:0;
+    color:#2c3e50;
+}
+
+.card-title .count{
+    background:#0a74d9;
+    color:white;
+    padding:4px 10px;
+    border-radius:6px;
+}
+
+.styled-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:15px;
+}
+
+.styled-table th{
+    background:#0a74d9;
+    color:white;
+    padding:12px;
+}
+
+.styled-table td{
+    padding:12px;
+    border-bottom:1px solid #eee;
+    text-align:center;
+}
+
+.styled-table tr:nth-child(even){
+    background:#f7f9fc;
+}
+
+.styled-table tr:hover{
+    background:#e8f0ff;
+}
+
+.actions{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+}
+
+.btn{
+    text-decoration:none;
+    padding:6px 12px;
+    color:white;
+    border-radius:6px;
+    font-size:14px;
+    transition:0.2s;
+}
+
+.students-btn{
+    background:#0a74d9;
+}
+
+.students-btn:hover{
+    background:#045cb5;
+}
+
+.eval-btn{
+    background:#28a745;
+}
+
+.eval-btn:hover{
+    background:#1e7e34;
+}
+
+.empty{
+    text-align:center;
+    color:#7f8c8d;
+    padding:20px;
+}
+
+</style>
+{% endblock %}

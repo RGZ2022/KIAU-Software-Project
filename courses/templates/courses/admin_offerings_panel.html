@@ -1,0 +1,77 @@
+{% extends "core/dashboard_base.html" %}
+
+{% block title %}پنل مدیریت ارائه‌ها{% endblock %}
+
+{% block dashboard_content %}
+<section class="panel">
+  <header class="panel__header" style="margin-bottom: 20px;">
+    <h2>پنل مدیریت ارائه‌ها</h2>
+    <p class="muted" style="color: #666; font-size: 14px;">مدیریت و نظارت بر ارائه‌های ترم‌های مختلف تحصیلی</p>
+  </header>
+
+  <!-- بخش فیلتر -->
+  <section class="card" style="padding: 15px; margin-bottom: 20px; border: 1px solid #eee; border-radius: 8px;">
+    <form method="get" class="filter-row" style="display: flex; gap: 10px; align-items: flex-end;">
+      <div class="field">
+        <label for="term" style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px;">فیلتر بر اساس ترم</label>
+        <input id="term" type="text" name="term" value="{{ term|default:'' }}"
+               placeholder="مثلاً 1405-1" 
+               style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+      </div>
+      <button type="submit" class="btn btn--primary" style="padding: 8px 16px;">فیلتر</button>
+      {% if term %}
+        <a class="btn btn--ghost" href="{% url 'courses:admin_offerings' %}" style="padding: 8px 16px; color: #d9534f; border: 1px solid #d9534f; border-radius: 4px; text-decoration: none;">حذف فیلتر</a>
+      {% endif %}
+    </form>
+  </section>
+
+  <!-- جدول ارائه‌ها -->
+  <section class="card" style="padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+    <div class="card__header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3>لیست ارائه‌ها</h3>
+      <div>
+        <span class="badge" style="background: #e9ecef; padding: 5px 12px; border-radius: 15px; margin-left: 10px;">{{ offerings|length }} مورد</span>
+        <a class="btn btn--primary" href="{% url 'courses:admin_offering_create' %}" style="background: #007bff; color: #fff; padding: 8px 15px; border-radius: 5px; text-decoration: none;">+ ایجاد ارائه</a>
+      </div>
+    </div>
+
+    {% if offerings %}
+      <div class="table-wrap" style="overflow-x: auto;">
+        <table class="table" style="width: 100%; border-collapse: collapse; text-align: right;">
+          <thead>
+            <tr style="border-bottom: 2px solid #eee;">
+              <th style="padding: 12px;">کد درس</th>
+              <th style="padding: 12px;">عنوان درس</th>
+              <th style="padding: 12px;">ترم</th>
+              <th style="padding: 12px;">استاد</th>
+              <th style="padding: 12px;">ظرفیت</th>
+              <th style="padding: 12px;">فعال</th>
+              <th style="padding: 12px; text-align: center;">عملیات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for o in offerings %}
+              <tr style="border-bottom: 1px solid #f8f9fa;">
+                <td style="padding: 12px;">{{ o.course.code }}</td>
+                <td style="padding: 12px;">{{ o.course.title }}</td>
+                <td style="padding: 12px;">{{ o.term }}</td>
+                <td style="padding: 12px;">{{ o.professor.get_full_name|default:o.professor.username }}</td>
+                <td style="padding: 12px;">{{ o.capacity }}</td>
+                <td style="padding: 12px;">{% if o.is_active %}✅{% else %}❌{% endif %}</td>
+                <td style="padding: 12px; text-align: center;">
+                  <a class="btn btn--ghost" href="{% url 'courses:admin_offering_edit' o.id %}" style="color: #007bff; text-decoration: none; margin-left: 10px;">ویرایش</a>
+                  <a class="btn btn--danger" href="{% url 'courses:admin_offering_delete' o.id %}" style="color: #dc3545; text-decoration: none;">حذف</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state" style="text-align: center; padding: 50px; color: #888; background: #fdfdfd; border: 1px dashed #ddd; border-radius: 8px;">
+        <p>هنوز هیچ ارائه‌ای در سیستم ثبت نشده است.</p>
+      </div>
+    {% endif %}
+  </section>
+</section>
+{% endblock %}

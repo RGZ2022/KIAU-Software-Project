@@ -1,0 +1,47 @@
+{% extends "core/dashboard_base.html" %}
+
+{% block dashboard_content %}
+<style>
+    .course-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .course-info-link { text-decoration: none; color: inherit; flex-grow: 1; }
+    .course-title { color: #0a74d9; font-weight: 700; font-size: 1.2rem; margin-bottom: 5px; }
+    .btn-evaluate {
+        background-color: #28a745;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+    .btn-evaluate:hover { background-color: #218838; color: white; }
+</style>
+
+<div style="padding: 20px;">
+    <h3 style="margin-bottom: 25px;">درس‌های من</h3>
+
+    {% for enrollment in enrollments %}
+        <div class="course-card">
+            <a href="{% url 'courses:course_detail' enrollment.offering.id %}" class="course-info-link">
+                <div class="course-title">{{ enrollment.offering.course.title }}</div>
+                <div style="color: #555;"><strong>ترم:</strong> {{ enrollment.offering.term }} | <strong>استاد:</strong> {{ enrollment.offering.professor }}</div>
+            </a>
+            <a href="{% url 'evaluations:evaluate_professor' enrollment.offering.id %}" class="btn-evaluate">
+                ارزیابی استاد
+            </a>
+        </div>
+    {% empty %}
+        <div class="course-card" style="justify-content: center; color: #888;">در حال حاضر درسی ندارید.</div>
+    {% endfor %}
+</div>
+{% endblock %}

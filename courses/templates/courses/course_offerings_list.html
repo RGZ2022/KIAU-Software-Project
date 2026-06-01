@@ -1,0 +1,120 @@
+{% extends "core/dashboard_base.html" %}
+
+{% block dashboard_content %}
+<style>
+    .page-title {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        border-right: 4px solid #3498db;
+        padding-right: 10px;
+    }
+
+    .filter-card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .custom-table th {
+        background: #34495e;
+        color: #fff;
+        padding: 15px;
+    }
+
+    .custom-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+    }
+
+    .custom-table tr:hover {
+        background: #f1f1f1;
+    }
+
+    .btn-filter {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .course-link {
+        text-decoration: none;
+        color: #3498db;
+        font-weight: bold;
+    }
+
+    .course-link:hover {
+        color: #1d6fa5;
+        text-decoration: underline;
+    }
+</style>
+
+<div class="content-wrapper">
+    <h2 class="page-title">📚 لیست دروس ارائه‌شده</h2>
+
+    <div class="filter-card">
+        <form method="GET">
+            <input
+                type="text"
+                name="term"
+                placeholder="ترم (مثلاً 1405-1)"
+                value="{{ request.GET.term }}"
+                style="padding: 8px; border: 1px solid #ccc; border-radius: 5px; width: 200px;"
+            >
+            <button type="submit" class="btn-filter">فیلتر</button>
+        </form>
+    </div>
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>کد درس</th>
+                <th>عنوان درس</th>
+                <th>ترم</th>
+                <th>استاد</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for off in offerings %}
+            <tr>
+                <td>{{ off.course.code|default:"-" }}</td>
+                <td>
+                    <!-- لینک به ویوی ثبت‌نام با ارسال ID ارائه -->
+                    <a href="{% url 'courses:enroll' off.id %}" class="course-link">
+                        {{ off.course.title|default:"بدون عنوان" }}
+                    </a>
+                </td>
+                <td>{{ off.term|default:"-" }}</td>
+                <td>
+                    {% with u=off.professor %}
+                        {% if u.first_name or u.last_name %}
+                            {{ u.first_name }} {{ u.last_name }}
+                        {% else %}
+                            {{ u.username }}
+                        {% endif %}
+                    {% endwith %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="padding: 20px;">درسی برای نمایش وجود ندارد.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

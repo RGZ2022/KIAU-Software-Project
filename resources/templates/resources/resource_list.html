@@ -1,0 +1,139 @@
+{% extends "core/dashboard_base.html" %}
+{% load static %}
+
+
+{% block dashboard_content %}
+
+<style>
+    .header-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .filter-card {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 3px 9px rgba(0,0,0,0.08);
+        margin-bottom: 25px;
+    }
+
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        padding: 0;
+        overflow: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 15px;
+    }
+
+    th {
+        background: #0a74d9;
+        color: white;
+        padding: 12px;
+        text-align: center;
+    }
+
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+    }
+
+    tbody tr:nth-child(even) {
+        background: #f8faff;
+    }
+
+    tbody tr:hover {
+        background: #e8f1ff;
+    }
+
+    .btn-download {
+        background: #28a745;
+        color: white !important;
+        padding: 6px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 13px;
+        transition: 0.2s;
+    }
+
+    .btn-download:hover {
+        background: #1f883a;
+    }
+
+    .btn-add {
+        background: #007bff;
+        color: white !important;
+        padding: 8px 15px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+
+    .btn-add:hover {
+        background: #005fcc;
+    }
+</style>
+
+
+<div class="header-box">
+    <h3><i class="fas fa-file-pdf"></i> منابع درسی من</h3>
+    <a href="{% url 'resources:resource_create' %}" class="btn-add">+ افزودن منبع جدید</a>
+</div>
+
+<div class="filter-card">
+    <form method="get" style="display: flex; gap: 10px; align-items: center;">
+        <label>فیلتر بر اساس درس:</label>
+        <select name="course" style="padding: 5px; border-radius: 4px;">
+            <option value="">همه دروس</option>
+            {% for c in courses %}
+                <option value="{{ c.id }}" {% if selected_course == c.id|stringformat:"s" %}selected{% endif %}>
+                    {{ c.title }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn-download" style="background:#6c757d;">اعمال فیلتر</button>
+    </form>
+</div>
+
+<div class="table-card">
+    <table>
+        <thead>
+            <tr>
+                <th>نام درس</th>
+                <th>عنوان فایل</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in resources %}
+            <tr>
+                <td>{{ r.course.title }}</td>
+                <td>{{ r.title }}</td>
+                <td>
+                    <a href="{% url 'resources:resource_download' r.id %}" class="btn-download">
+                        <i class="fas fa-download"></i> دانلود
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align: center; padding: 20px;">
+                    هیچ منبعی یافت نشد.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
