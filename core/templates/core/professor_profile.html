@@ -226,47 +226,52 @@
                 {% endfor %}
             </div>
 
-            <!-- پنل ثبت ارزیابی (سمت چپ - اصلاح شده) -->
-            <div class="col-lg-4">
-                {% if user.is_authenticated and user.role == "student" %}
-                <div class="eval-box shadow">
-                    <h5 class="fw-bold mb-4 text-center border-bottom pb-3">ثبت ارزیابی شما</h5>
-                    
-                    {% if stats.user_has_rated %}
-                        <div class="alert alert-info text-center py-3">
-                            <i class="fas fa-check-circle d-block fa-2x mb-2"></i>
-                            شما قبلاً به این استاد امتیاز داده‌اید.
-                        </div>
-                    {% else %}
-                        <form id="evaluationForm">
-                            {% csrf_token %}
-                            <label class="d-block text-center mb-2 fw-bold text-muted">امتیاز دهید:</label>
-                            <div class="star-picker">
-                                <input type="radio" name="rating" id="r5" value="5" required><label for="r5">★</label>
-                                <input type="radio" name="rating" id="r4" value="4"><label for="r4">★</label>
-                                <input type="radio" name="rating" id="r3" value="3"><label for="r3">★</label>
-                                <input type="radio" name="rating" id="r2" value="2"><label for="r2">★</label>
-                                <input type="radio" name="rating" id="r1" value="1"><label for="r1">★</label>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-bold mb-2">تجربه شما:</label>
-                                <textarea 
-                                    name="comment" 
-                                    class="form-control custom-textarea" 
-                                    rows="7" 
-                                    placeholder="نظر خود را در مورد این استاد بنویسید..."></textarea>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-submit-new">
-                                <i class="fas fa-paper-plane me-2"></i> ثبت نهایی ارزیابی
-                            </button>
-                        </form>
-                    {% endif %}
-                </div>
-                {% endif %}
+           <!-- پنل ثبت ارزیابی -->
+<div class="col-lg-4">
+    {% if user.is_authenticated and user.role == "student" %}
+    <div class="eval-box shadow">
+
+        <h5 class="fw-bold mb-4 text-center border-bottom pb-3">
+            ثبت ارزیابی
+        </h5>
+
+        {% if stats.user_has_rated %}
+
+            <div class="alert alert-info text-center py-3">
+                <p style="margin:0;font-weight:bold;">
+                    ✅ شما قبلاً این استاد را ارزیابی کرده‌اید.
+                </p>
             </div>
-        </div>
+
+        {% elif offering %}
+
+            <p class="text-center"
+               style="line-height:2;color:#555;margin-bottom:25px;">
+                برای ثبت امتیاز و نظر درباره این استاد روی دکمه زیر کلیک کنید.
+            </p>
+
+            <a href="{% url 'evaluations:evaluate_professor' offering.id %}"
+               class="btn-submit-new"
+               style="
+                    display:block;
+                    text-align:center;
+                    text-decoration:none;
+                    box-sizing:border-box;
+               ">
+                ثبت ارزیابی
+            </a>
+
+        {% else %}
+
+            <div class="alert alert-warning text-center py-3">
+                <p style="margin:0;">
+                    شما در حال حاضر هیچ درس فعالی با این استاد ندارید و امکان ثبت ارزیابی وجود ندارد.
+                </p>
+            </div>
+
+        {% endif %}
+
     </div>
+    {% endif %}
 </div>
 {% endblock %}

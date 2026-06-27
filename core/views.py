@@ -1,4 +1,3 @@
-# core/views.py - نسخه کامل‌شده
 from evaluations.utils import calculate_professor_stats
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.shortcuts import render,get_object_or_404,redirect
@@ -82,9 +81,13 @@ def dashboard(request):
 
 @login_required
 def professor_profile(request, professor_id):
-    professor = get_object_or_404(User, id=professor_id, role="professor")
+    professor = get_object_or_404(
+        User,
+        id=professor_id,
+        role="professor"
+    )
 
-    # ---- Sorting ----
+    # ---------- مرتب‌سازی ----------
     sort = request.GET.get("sort", "newest")
 
     if sort == "oldest":
@@ -93,26 +96,48 @@ def professor_profile(request, professor_id):
         order = "-rating"
     elif sort == "lowest":
         order = "rating"
-    else:  # newest
+    else:
         order = "-created_at"
 
-    evaluations = Evaluation.objects.filter(
-        offering__professor=professor
-    ).order_by(order)
+    evaluations = (
+        Evaluation.objects
+        .filter(offering__professor=professor)
+        .order_by(order)
+    )
 
-    # ---- Pagination ----
-    paginator = Paginator(evaluations, 5)  # هر صفحه ۵ نظر
+    # ---------- صفحه‌بندی ----------
+    paginator = Paginator(evaluations, 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    # ---- Stats ----
+    # ---------- آمار استاد ----------
     stats = calculate_professor_stats(professor)
+
+    # ---------- پیدا کردن ارائه دانشجو ----------
+    offering = None
+
+    if request.user.is_authenticated and request.user.role == "student":
+
+        enrollment = (
+            Enrollment.objects
+            .filter(
+                student=request.user,
+                status="active",
+                offering__professor=professor
+            )
+            .select_related("offering")
+            .first()
+        )
+
+        if enrollment:
+            offering = enrollment.offering
 
     return render(request, "core/professor_profile.html", {
         "professor": professor,
         "stats": stats,
         "page_obj": page_obj,
         "sort": sort,
+        "offering": offering,
     })
 
 @require_POST
