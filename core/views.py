@@ -1,69 +1,85 @@
 from evaluations.utils import calculate_professor_stats
-from django.contrib.auth.decorators import login_required,user_passes_test
-from django.shortcuts import render,get_object_or_404,redirect
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Avg
-from courses.models import Enrollment, CourseOffering,Course
+from courses.models import Enrollment, CourseOffering, Course
 from evaluations.models import Evaluation, Appeal
 from accounts.models import User
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
-from django.contrib.auth import get_user_model  
+from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
+# Admin check
 def is_admin(user):
     return user.role == 'admin' or user.is_superuser
 
+
+# Home
 def home(request):
     return render(request, 'core/home.html')
 
+
+# Dashboard
 @login_required
 def dashboard(request):
     user = request.user
     context = {}
 
+    # Student
     if user.role == "student":
-        # دروس ثبت‌نام‌شده فعال
+        # Active enrollments
         enrollments = Enrollment.objects.filter(
             student=user,
             status="active"
-        ).select_related("offering", "offering__course", "offering__professor")
-        
+        ).select_related(
+            "offering",
+            "offering__course",
+            "offering__professor"
+        )
+
         context["enrollments"] = enrollments
         return render(request, "core/dashboard_student.html", context)
 
+    # Professor
     elif user.role == "professor":
-        # دروس ارائه‌شده توسط استاد
+        # Course offerings
         offerings = CourseOffering.objects.filter(
             professor=user
         ).select_related("course").prefetch_related("evaluations")
 
-        # محاسبه میانگین نمره برای هر ارائه
+        # Average rating
         for offering in offerings:
             offering.average_rating = offering.evaluations.aggregate(
                 avg=Avg("rating")
             )["avg"]
 
-        # محاسبه میانگین کلی نمرات استاد
+        # Overall rating
         average_grade = Evaluation.objects.filter(
             offering__professor=user
         ).aggregate(avg=Avg("rating"))["avg"]
 
         context["offerings"] = offerings
         context["average_grade"] = average_grade
+
         return render(request, "core/dashboard_professor.html", context)
 
+    # Admin
     elif user.role == "admin":
-        # آمار کلی سیستم
+        # Statistics
         stats = {
             "total_students": user.__class__.objects.filter(role="student").count(),
             "total_professors": user.__class__.objects.filter(role="professor").count(),
             "total_courses": CourseOffering.objects.count(),
-            "pending_appeals": Appeal.objects.filter(status=Appeal.STATUS_PENDING).count(),
+            "pending_appeals": Appeal.objects.filter(
+                status=Appeal.STATUS_PENDING
+            ).count(),
         }
 
-        # آخرین اعتراض‌ها (5 تا)
+        # Latest appeals
         latest_appeals = Appeal.objects.select_related(
             "evaluation",
             "evaluation__offering",
@@ -73,21 +89,22 @@ def dashboard(request):
 
         context["stats"] = stats
         context["latest_appeals"] = latest_appeals
+
         return render(request, "core/dashboard_admin.html", context)
 
-    # اگر نقش ناشناخته بود
+    # Default
     return render(request, "core/dashboard_default.html", context)
-
-
+# Professor profile
 @login_required
 def professor_profile(request, professor_id):
+    # Get professor
     professor = get_object_or_404(
         User,
         id=professor_id,
         role="professor"
     )
 
-    # ---------- مرتب‌سازی ----------
+    # Sort
     sort = request.GET.get("sort", "newest")
 
     if sort == "oldest":
@@ -99,21 +116,22 @@ def professor_profile(request, professor_id):
     else:
         order = "-created_at"
 
+    # Evaluations
     evaluations = (
         Evaluation.objects
         .filter(offering__professor=professor)
         .order_by(order)
     )
 
-    # ---------- صفحه‌بندی ----------
+    # Pagination
     paginator = Paginator(evaluations, 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    # ---------- آمار استاد ----------
+    # Statistics
     stats = calculate_professor_stats(professor)
 
-    # ---------- پیدا کردن ارائه دانشجو ----------
+    # Student offering
     offering = None
 
     if request.user.is_authenticated and request.user.role == "student":
@@ -140,33 +158,46 @@ def professor_profile(request, professor_id):
         "offering": offering,
     })
 
+
+# Ajax evaluation
 @require_POST
 @login_required
 def ajax_submit_evaluation(request, professor_id):
-    professor = get_object_or_404(User, id=professor_id, role="professor")
+    # Get professor
+    professor = get_object_or_404(
+        User,
+        id=professor_id,
+        role="professor"
+    )
 
-    # جلوگیری از ثبت چند ارزیابی برای یک استاد
+    # Duplicate check
     existing = Evaluation.objects.filter(
         student=request.user,
         offering__professor=professor
     ).exists()
 
     if existing:
-        return JsonResponse({"error": "already_submitted"}, status=400)
+        return JsonResponse(
+            {"error": "already_submitted"},
+            status=400
+        )
 
+    # Form data
     rating = int(request.POST.get("rating"))
     comment = request.POST.get("comment", "")
 
-    # نکته مهم:
-    # باید offering مشخص باشد. دانشجو ممکن است چند درس با این استاد داشته باشد.
-    # اما فعلاً ساده نگه می‌داریم و اولین offering فعال را می‌گیریم:
+    # Get offering
     offering = CourseOffering.objects.filter(
         professor=professor
     ).first()
 
     if offering is None:
-        return JsonResponse({"error": "no_offering_found"}, status=400)
+        return JsonResponse(
+            {"error": "no_offering_found"},
+            status=400
+        )
 
+    # Save evaluation
     evaluation = Evaluation.objects.create(
         student=request.user,
         offering=offering,
@@ -174,6 +205,7 @@ def ajax_submit_evaluation(request, professor_id):
         comment=comment
     )
 
+    # Response
     return JsonResponse({
         "rating": rating,
         "comment": comment,
@@ -181,59 +213,77 @@ def ajax_submit_evaluation(request, professor_id):
         "stars": "★" * rating
     })
 
-
+# Student dashboard
 def dashboard_student(request):
+    # Current user
     current_user = request.user
 
-    # ۱. محاسبه تعداد دقیق درس‌ها
-    enrollment_count = Enrollment.objects.filter(student=current_user).count()
-    
-    # ۲. (اختیاری) اگر در جای دیگری از قالب به لیست enrollments نیاز داری، آن را هم نگه دار
-    enrollments = Enrollment.objects.filter(student=current_user)
+    # Enrollment count
+    enrollment_count = Enrollment.objects.filter(
+        student=current_user
+    ).count()
+
+    # Enrollments
+    enrollments = Enrollment.objects.filter(
+        student=current_user
+    )
 
     return render(request, 'core/dashboard_student.html', {
         'student': current_user,
-        'count': enrollment_count, # ارسال متغیر count برای نمایش عدد
+        'count': enrollment_count,
         'enrollments': enrollments,
-        # evaluations هم اگر استفاده نمی‌شود می‌توانی حذف کنی
     })
 
 
-
-
+# Professor dashboard
 def dashboard_professor(request):
-    # فرض می‌کنیم کاربری که لاگین کرده همان استاد است
-    current_user = request.user 
+    # Current user
+    current_user = request.user
 
-    # اصلاح فیلتر: به جای professor، از offering__professor استفاده می‌کنیم
-    # (باید مطمئن شوی در مدل Offering فیلدی به اسم professor داری)
-    evaluations = Evaluation.objects.filter(offering__professor=current_user)
+    # Evaluations
+    evaluations = Evaluation.objects.filter(
+        offering__professor=current_user
+    )
 
-    # محاسبه میانگین (با فرض فیلد rating در Evaluation)
+    # Average rating
     from django.db.models import Avg
-    avg_rating = evaluations.aggregate(Avg('rating'))['rating__avg']
+    avg_rating = evaluations.aggregate(
+        Avg('rating')
+    )['rating__avg']
 
-    # فیلتر اعتراض‌ها برای همین استاد
-    evaluations_with_appeals = evaluations.select_related('student', 'offering__course', 'appeal').filter(appeal__isnull=False)
+    # Appeals
+    evaluations_with_appeals = evaluations.select_related(
+        'student',
+        'offering__course',
+        'appeal'
+    ).filter(
+        appeal__isnull=False
+    )
 
     return render(request, 'core/dashboard_professor.html', {
         'avg_rating': avg_rating or 0,
         'evaluations_with_appeals': evaluations_with_appeals,
     })
 
+
+# Admin dashboard
 @login_required
 @user_passes_test(is_admin)
 def dashboard_admin(request):
-    # محاسبه آمار بر اساس نقش‌های تعریف شده در مدل User تو
+    # Statistics
     stats = {
-        'total_students': User.objects.filter(role='student').count(),
-        'total_professors': User.objects.filter(role='professor').count(),
+        'total_students': User.objects.filter(
+            role='student'
+        ).count(),
+        'total_professors': User.objects.filter(
+            role='professor'
+        ).count(),
         'total_courses': Course.objects.count(),
     }
 
-    # دریافت ۵ اعتراض آخر
+    # Latest appeals
     latest_appeals = Appeal.objects.select_related(
-        'evaluation__student', 
+        'evaluation__student',
         'evaluation__offering__course'
     ).order_by('-id')[:5]
 
@@ -242,16 +292,33 @@ def dashboard_admin(request):
         'latest_appeals': latest_appeals,
     })
 
+
+# Redirect dashboard
 @login_required
 def redirect_dashboard(request):
+    # Admin
     if request.user.is_superuser or request.user.is_staff:
         return redirect('core:dashboard_admin')
-    elif hasattr(request.user, 'professor_profile'): # فرض بر اینکه پروفایل استاد دارید
+
+    # Professor
+    elif hasattr(request.user, 'professor_profile'):
         return redirect('core:dashboard_professor')
+
+    # Student
     else:
         return redirect('core:dashboard_student')
 
+
+# My courses
 def my_courses(request):
+    # Current user
     current_user = request.user
-    enrollments = Enrollment.objects.filter(student=current_user)
-    return render(request, 'core/my_courses.html', {'enrollments': enrollments})
+
+    # Enrollments
+    enrollments = Enrollment.objects.filter(
+        student=current_user
+    )
+
+    return render(request, 'core/my_courses.html', {
+        'enrollments': enrollments
+    })

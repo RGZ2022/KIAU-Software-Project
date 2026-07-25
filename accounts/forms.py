@@ -1,20 +1,22 @@
 from django import forms
 from .models import User
 
+
 class RegisterForm(forms.ModelForm):
-    # تعریف گزینه‌ها بدون ادمین
+    # Role options
     ROLE_CHOICES = [
         ('student', 'دانشجو'),
         ('professor', 'استاد'),
     ]
-    
+
+    # Role field
     role = forms.ChoiceField(
-        choices=ROLE_CHOICES, 
+        choices=ROLE_CHOICES,
         label="نقش کاربری",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-    
-    # تعریف فیلدهای پسورد به صورت دستی برای تاییدیه
+
+    # Password fields
     password = forms.CharField(
         label="رمز عبور",
         widget=forms.PasswordInput(attrs={'placeholder': '********'})
@@ -26,16 +28,18 @@ class RegisterForm(forms.ModelForm):
 
     class Meta:
         model = User
-        # فیلد پسورد اصلی مدل را اینجا می‌آوریم
+        # Form fields
         fields = ['username', 'email', 'role', 'password']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Labels
         self.fields["email"].required = True
         self.fields["email"].label = "آدرس ایمیل"
         self.fields["username"].label = "نام کاربری"
 
     def clean_email(self):
+        # Email validation
         email = self.cleaned_data.get("email", "").strip()
         if not email:
             raise forms.ValidationError("وارد کردن ایمیل الزامی است.")
@@ -44,6 +48,7 @@ class RegisterForm(forms.ModelForm):
         return email
 
     def clean(self):
+        # Password match
         cleaned_data = super().clean()
         password = cleaned_data.get("password")
         confirm_password = cleaned_data.get("confirm_password")
@@ -53,14 +58,16 @@ class RegisterForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
+        # Hash password
         user = super().save(commit=False)
-        # بسیار مهم: هش کردن پسورد قبل از ذخیره در دیتابیس
         user.set_password(self.cleaned_data["password"])
         if commit:
             user.save()
         return user
 
+
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = User
+        # Profile fields
         fields = ['username', 'email']

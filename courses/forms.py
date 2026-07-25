@@ -1,7 +1,7 @@
 from django import forms
 from .models import CourseOffering
 
-class OfferingForm(forms.ModelForm):  # نام کلاس اینجا OfferingForm است
+class OfferingForm(forms.ModelForm): 
     class Meta:
         model = CourseOffering
         fields = [
